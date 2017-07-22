@@ -8,7 +8,7 @@
  */
 
 var points = [];
-var numPoints = 50;
+var numPoints = 75;
 var maxPoints = 75;
 var radius = 5;
 var mainRadius = 50;
@@ -17,6 +17,7 @@ var mousePos = {
 	"x": -1,
 	"y": -1,
 };
+var controlPoints = [];
 
 var maxSpeed = 0.5;
 
@@ -57,6 +58,14 @@ function setup() {
 	let canvas = document.getElementById("test");
 	canvas.width = document.body.clientWidth;
 	canvas.height = document.body.clientHeight;
+	for (let i = 0; i < 14; i ++) {
+		for (let j = 0; j < 8; j++) {
+			controlPoints.push({
+				"x": (canvas.width / 15) * i,
+				"y": (canvas.height / 8) * j
+			});
+		}
+	}
 	for (let i = 0; i < numPoints-1; i ++) {
 		points.push({
 			"xVel": getSpeed(maxSpeed),
@@ -190,7 +199,8 @@ function draw() {
 			maxDist = Math.sqrt(canvas.height*canvas.height + canvas.width*canvas.width);
 			ctx.strokeStyle = "rgba(27,112,153," + (1- dist*5/maxDist) + ")"
 			ctx.moveTo(point.x, point.y);
-			ctx.lineTo(neighbour[1].x, neighbour[1].y);
+			cp = getControlPoint(point);
+			ctx.quadraticCurveTo(cp.x, cp.y, neighbour[1].x, neighbour[1].y);
 			ctx.stroke();
 		}
 	}
@@ -227,6 +237,18 @@ function draw() {
 
 function getDist(a, b) {
 	return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+function getControlPoint(p) {
+	minDist = 100000000;
+	ret = null;
+	for (cp of controlPoints) {
+		if (getDist(p, cp) < minDist) {
+			minDist = getDist(p, cp);
+			ret = cp;
+		}
+	}
+	return ret;
 }
 
 function run() {
